@@ -461,6 +461,1617 @@
     <div class="card">
       <h1><img class="app-logo" src="./2376.png" alt=""><span>デジタルフォトフレーム</span></h1>
       
+      <button type="button" id="install-button" class="btn" style="display: none; background: #ff9800; margin-bottom: 15px;">
+        <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M10 5h4M11 18h2"/><path d="M2.5 9.5h7M6 6l3.5 3.5L6 13"/></svg>アプリとしてインストール
+      </button>
+
+      <button type="button" id="btn-folder" class="btn btn-folder" onclick="document.getElementById('folder-input').click()">
+        <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8.5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>フォルダごと選択して一括追加
+      </button>
+      <input type="file" id="folder-input" webkitdirectory directory multiple onchange="handleFolderSelect(event)">
+
+      <button type="button" id="btn-file" class="btn" style="background: #007bff;" onclick="document.getElementById('file-input').click()">
+        <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.5"/><path d="m4 17 5-5 3 3 2-2 6 6"/></svg>写真・動画ファイルを個別に選択・追加
+      </button>
+      <input type="file" id="file-input" multiple accept="image/*,video/*" onchange="handleFileSelect(event)">
+
+      <div style="text-align: center; margin: 15px 0;">
+        <div style="font-size: 1.1rem; font-weight: bold; color: #4da6ff;">
+          現在の登録枚数: <span id="photo-count">0</span> 件
+        </div>
+        <div id="bg-status" style="font-size: 0.9rem; color: #dff7ff; margin-top: 8px; min-height: 1.4em;">待機中</div>
+        <div id="upload-progress-wrap" style="display:none; margin-top:8px;">
+          <div style="display:flex; justify-content:space-between; font-size:.78rem; color:#b9dce8; margin-bottom:4px;"><span>登録進捗</span><span id="upload-progress-text">0 / 0</span></div>
+          <div style="height:8px; background:#102b36; border-radius:99px; overflow:hidden; border:1px solid #315b68;"><div id="upload-progress-bar" style="height:100%; width:0%; background:linear-gradient(90deg,#55c8ef,#e7b65b); transition:width .15s ease;"></div></div>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-secondary" style="background: #17a2b8;" onclick="openPhotoManager()">
+        <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.2-6 9.5-6 9.5 6 9.5 6-3.2 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.7"/></svg>登録ファイルの一覧・個別削除
+      </button>
+
+      <button type="button" class="btn btn-danger" style="margin-top: 10px;" onclick="clearPhotosDB()">
+        <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6"/></svg>登録ファイルをすべてリセット
+      </button>
+
+      <div style="margin-top: 20px; background: #252525; padding: 12px; border-radius: 8px;">
+        <label style="display: block; font-weight: bold; margin-bottom: 6px;">
+          <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m9 8 6 4-6 4z"/></svg>再生するメディア種別
+        </label>
+        <select id="media-type-filter" style="width: 100%; background: #333; color: #fff; border: 1px solid #555; padding: 8px; border-radius: 6px;" onchange="saveSettings()">
+          <option value="all">写真と動画の両方</option>
+          <option value="image">写真のみ</option>
+          <option value="video">動画のみ</option>
+        </select>
+      </div>
+
+      <div style="margin-top: 15px; background: #252525; padding: 12px; border-radius: 8px;">
+        <label style="display: flex; align-items: center; gap: 8px; font-weight: bold; cursor: pointer;">
+          <input type="checkbox" id="video-audio-enable" onchange="saveSettings()">
+          <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6l-5 4H4Z"/><path d="M17 9.5a4 4 0 0 1 0 5M19.5 7a7.5 7.5 0 0 1 0 10"/></svg>動画の音声を再生する
+        </label>
+      </div>
+
+      <div style="margin-top: 15px; background: #252525; padding: 12px; border-radius: 8px;">
+        <label style="display: block; font-weight: bold; margin-bottom: 6px;">
+          <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2M9 2h6"/></svg>写真1枚の表示時間（秒）
+        </label>
+        <input type="number" id="display-duration" value="5" min="1" max="300" style="width: 100%; background: #333; color: #fff; border: 1px solid #555; padding: 8px; border-radius: 6px;" onchange="saveSettings()">
+      </div>
+
+      <div style="margin-top: 15px; background: #252525; padding: 12px; border-radius: 8px;">
+        <label style="display: flex; align-items: center; gap: 8px; font-weight: bold; cursor: pointer; margin-bottom: 8px;">
+          <input type="checkbox" id="random-enable">
+          <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3c4 0 5 10 10 10h3M17 14l3 3-3 3M4 17h3c1.7 0 2.8-1.2 3.6-2.7M17 4l3 3-3 3"/></svg>ランダムに再生する
+        </label>
+        <div id="random-controls" style="margin-top: 10px; padding-left: 20px; display: none;">
+          <label style="font-size: 0.85rem; color: #aaa; display: block; margin-bottom: 8px;"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 9h18M7 13h3M7 17h6"/></svg>撮影期間フィルター・表示割合設定（比率）</label>
+          <div id="filter-date-list"></div>
+          <button type="button" class="btn btn-secondary" style="font-size: 0.85rem; padding: 8px; margin-top: 8px;" id="add-filter-date-button">
+            ＋ 撮影期間を追加
+          </button>
+        </div>
+      </div>
+
+      <div style="margin-top: 15px; background: #252525; padding: 12px; border-radius: 8px;">
+        <label style="display: flex; align-items: center; gap: 8px; font-weight: bold; cursor: pointer;">
+          <input type="checkbox" id="schedule-enable">
+          <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>曜日別・動作時間帯を指定する（自動消灯）
+        </label>
+        
+        <div id="schedule-controls" style="display: none; margin-top: 12px;">
+          <div class="day-tabs">
+            <button type="button" class="day-tab active" onclick="switchDayTab(0)">日</button>
+            <button type="button" class="day-tab" onclick="switchDayTab(1)">月</button>
+            <button type="button" class="day-tab" onclick="switchDayTab(2)">火</button>
+            <button type="button" class="day-tab" onclick="switchDayTab(3)">水</button>
+            <button type="button" class="day-tab" onclick="switchDayTab(4)">木</button>
+            <button type="button" class="day-tab" onclick="switchDayTab(5)">金</button>
+            <button type="button" class="day-tab" onclick="switchDayTab(6)">土</button>
+          </div>
+          <div id="schedule-list"></div>
+          <button type="button" class="btn btn-secondary" style="font-size: 0.85rem; padding: 8px; margin-top: 8px;" id="add-schedule-slot-button">
+            ＋ この曜日に時間帯を追加
+          </button>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-preview" style="margin-top: 24px; font-size: 1.1rem;" onclick="startSlideshow()">
+        <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path class="ui-icon-fill" d="M8 5.5v13l10-6.5z"/></svg>スライドショーを開始
+      </button>
+    </div>
+  </div>
+
+  <div id="modal-screen">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="15" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m4 18 5-5 3 3 2-2 6 5"/></svg>登録ファイルの管理 (<span id="manager-count">0</span>件)</h3>
+        <button type="button" class="btn btn-danger" style="width: auto; padding: 6px 14px; margin: 0;" onclick="closePhotoManager()">閉じる</button>
+      </div>
+
+      <div class="modal-toolbar">
+        <div class="view-btn-group">
+          <button type="button" id="view-btn-grid" class="view-btn active" onclick="switchManagerView('grid')"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>サムネイル</button>
+          <button type="button" id="view-btn-list" class="view-btn" onclick="switchManagerView('list')"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h14M6 12h14M6 19h14M3 5h.01M3 12h.01M3 19h.01"/></svg>リスト</button>
+        </div>
+        <div style="margin-left: auto; display: flex; gap: 6px; align-items: center;">
+          <label>並べ替え:</label>
+          <select id="sort-key" onchange="changeSortConfig()">
+            <option value="timestamp">撮影日順</option>
+            <option value="name">ファイル名順</option>
+            <option value="id">アップロード順</option>
+          </select>
+          <select id="sort-order" onchange="changeSortConfig()">
+            <option value="asc">昇順 ↑</option>
+            <option value="desc">降順 ↓</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-body grid-view" id="thumbnail-container"></div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" style="width: auto; padding: 6px 14px; margin: 0;" onclick="changeManagerPage(-1)">‹ 前へ</button>
+        <span id="page-indicator" style="font-size: 0.9rem; color: #ccc;">1 / 1</span>
+        <button type="button" class="btn btn-secondary" style="width: auto; padding: 6px 14px; margin: 0;" onclick="changeManagerPage(1)">次へ ›</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="slideshow-screen">
+    <div id="photo-container" style="position: relative; width: 100%; height: 100%;"></div>
+    <div id="date-overlay">----/--/-- --:--</div>
+    
+    <div id="controls">
+      <button type="button" class="ctrl-btn ctrl-btn-danger" onclick="deleteCurrentPhoto(event)"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14"/></svg>この写真を削除</button>
+      <button type="button" class="ctrl-btn" onclick="toggleFullscreen()">全画面切替</button>
+      <button type="button" class="ctrl-btn" onclick="stopSlideshow()">設定画面へ</button>
+    </div>
+  </div>
+
+  <div id="blackout-screen" onclick="stopSlideshow()"></div>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((registration) => {
+            console.log('Service Worker 登録成功:', registration.scope);
+          })
+          .catch((error) => {
+            console.error('Service Worker 登録失敗:', error);
+          });
+      });
+    }
+
+    // PWA インストール処理
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const installBtn = document.getElementById('install-button');
+      if (installBtn) {
+        installBtn.style.display = 'block';
+        installBtn.onclick = async () => {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User choice: ${outcome}`);
+            deferredPrompt = null;
+            installBtn.style.display = 'none';
+          }
+        };
+      }
+    });
+
+    window.addEventListener('appinstalled', () => {
+      const installBtn = document.getElementById('install-button');
+      if (installBtn) installBtn.style.display = 'none';
+      console.log('PWA was installed');
+    });
+
+    let photoMetaList = []; 
+    let currentIndex = 0;
+    let timer = null;
+    let currentDayTab = 0;
+    const defaultSchedules = {
+      0: [{ start: "08:00", end: "22:00" }],
+      1: [{ start: "08:00", end: "22:00" }],
+      2: [{ start: "08:00", end: "22:00" }],
+      3: [{ start: "08:00", end: "22:00" }],
+      4: [{ start: "08:00", end: "22:00" }],
+      5: [{ start: "08:00", end: "22:00" }],
+      6: [{ start: "08:00", end: "22:00" }]
+    };
+    let schedulesByDay = JSON.parse(JSON.stringify(defaultSchedules));
+    let filterDateRanges = [];
+    let otherDateRatio = 1;
+    let db = null;
+    let managerPage = 1;
+    const ITEMS_PER_PAGE = 40;
+    let currentObjectUrl = null;
+    let currentPlayingPhotoId = null;
+
+    let managerViewMode = 'grid';
+    let managerSortKey = 'timestamp';
+    let managerSortOrder = 'asc';
+
+    // スワイプ操作用変数
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    const request = indexedDB.open("PhotoFrameDB", 13);
+    request.onupgradeneeded = (e) => {
+      db = e.target.result;
+      if (!db.objectStoreNames.contains("photos")) {
+        db.createObjectStore("photos", { keyPath: "id", autoIncrement: true });
+      }
+      if (!db.objectStoreNames.contains("settings")) {
+        db.createObjectStore("settings");
+      }
+    };
+    request.onsuccess = (e) => {
+      db = e.target.result;
+      loadPhotosMetadataFromDB();
+      loadSettings();
+    };
+
+    function generateHourOptionsHTML(selectedHour) {
+      let html = '';
+      for (let h = 0; h < 24; h++) {
+        const hh = String(h).padStart(2, '0');
+        const isSelected = hh === selectedHour ? 'selected' : '';
+        html += `<option value="${hh}" ${isSelected}>${hh}時</option>`;
+      }
+      return html;
+    }
+
+    function generateMinOptionsHTML(selectedMin) {
+      let html = '';
+      for (let m = 0; m < 60; m++) {
+        const mm = String(m).padStart(2, '0');
+        const isSelected = mm === selectedMin ? 'selected' : '';
+        html += `<option value="${mm}" ${isSelected}>${mm}分</option>`;
+      }
+      return html;
+    }
+
+    function updateScheduleTime(day, idx, type, hOrM, value) {
+      let currentVal = schedulesByDay[day][idx][type] || "08:00";
+      let [h, m] = currentVal.split(':');
+      if (hOrM === 'h') h = value;
+      if (hOrM === 'm') m = value;
+      schedulesByDay[day][idx][type] = `${h}:${m}`;
+      saveSettings();
+    }
+
+    function compressImage(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            const MAX_DIM = 1920;
+
+            if (width > height && width > MAX_DIM) {
+              height = Math.round((height * MAX_DIM) / width);
+              width = MAX_DIM;
+            } else if (height > MAX_DIM) {
+              width = Math.round((width * MAX_DIM) / height);
+              height = MAX_DIM;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            canvas.toBlob((blob) => {
+              resolve(blob || file);
+            }, 'image/jpeg', 0.85);
+          };
+          img.onerror = () => resolve(file);
+          img.src = e.target.result;
+        };
+        reader.onerror = () => resolve(file);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function saveBlobToDB(blob, name, size, timestamp, isVideo, callback) {
+      if (!db) return;
+      const tx = db.transaction("photos", "readwrite");
+      const store = tx.objectStore("photos");
+      const req = store.add({ blob, name, size, timestamp: timestamp || Date.now(), isVideo: !!isVideo });
+      req.onsuccess = (e) => {
+        if (callback) callback(e.target.result);
+      };
+    }
+
+    function deletePhotoFromDB(id, callback) {
+      if (!db) return;
+      const tx = db.transaction("photos", "readwrite");
+      const store = tx.objectStore("photos");
+      const req = store.delete(id);
+      req.onsuccess = () => {
+        if (callback) callback();
+      };
+    }
+
+    function clearPhotosDB() {
+      if (!db) return;
+      if (!confirm("登録されているファイルをすべて削除しますか？")) return;
+      const tx = db.transaction("photos", "readwrite");
+      tx.objectStore("photos").clear();
+      photoMetaList = [];
+      document.getElementById('photo-count').innerText = 0;
+      document.getElementById('bg-status').innerText = "";
+      alert("ファイルをすべてリセットしました。");
+    }
+
+    function loadPhotosMetadataFromDB() {
+      if (!db) return;
+      const tx = db.transaction("photos", "readonly");
+      const store = tx.objectStore("photos");
+      const requestAll = store.openCursor();
+      photoMetaList = [];
+
+      requestAll.onsuccess = (e) => {
+        const cursor = e.target.result;
+        if (cursor) {
+          const record = cursor.value;
+          const id = cursor.key;
+          const fileTimestamp = record.timestamp || Date.now();
+          const date = new Date(fileTimestamp);
+          const dateStr = `${date.getFullYear()}/${String(date.getMonth()+1).padStart(2,'0')}/${String(date.getDate()).padStart(2,'0')} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+          
+          photoMetaList.push({
+            id,
+            name: record.name,
+            size: record.size,
+            timestamp: fileTimestamp,
+            dateText: dateStr,
+            isVideo: !!record.isVideo
+          });
+          cursor.continue();
+        } else {
+          document.getElementById('photo-count').innerText = photoMetaList.length;
+        }
+      };
+    }
+
+    function saveSettings() {
+      const scheduleEnabled = document.getElementById('schedule-enable').checked;
+      const randomEnabled = document.getElementById('random-enable').checked;
+      const displayDuration = document.getElementById('display-duration').value;
+      const mediaType = document.getElementById('media-type-filter').value;
+      const videoAudioEnabled = document.getElementById('video-audio-enable').checked;
+
+      localStorage.setItem('schedule_enabled', scheduleEnabled);
+      localStorage.setItem('random_enabled', randomEnabled);
+      localStorage.setItem('display_duration', displayDuration);
+      localStorage.setItem('media_type_filter', mediaType);
+      localStorage.setItem('video_audio_enabled', videoAudioEnabled);
+      localStorage.setItem('filter_date_ranges', JSON.stringify(filterDateRanges));
+      localStorage.setItem('other_date_ratio', otherDateRatio);
+      localStorage.setItem('schedules_by_day', JSON.stringify(schedulesByDay));
+
+      if (db && db.objectStoreNames.contains("settings")) {
+        const tx = db.transaction("settings", "readwrite");
+        const store = tx.objectStore("settings");
+        store.put(schedulesByDay, "schedules_by_day");
+        store.put(scheduleEnabled, "schedule_enabled");
+        store.put(randomEnabled, "random_enabled");
+        store.put(displayDuration, "display_duration");
+        store.put(mediaType, "media_type_filter");
+        store.put(videoAudioEnabled, "video_audio_enabled");
+        store.put(filterDateRanges, "filter_date_ranges");
+        store.put(otherDateRatio, "other_date_ratio");
+      }
+    }
+
+    function loadSettings() {
+      const applySettingsUI = () => {
+        toggleRandomUI();
+        switchDayTab(currentDayTab);
+        toggleScheduleUI();
+      };
+
+      if (db && db.objectStoreNames.contains("settings")) {
+        const tx = db.transaction("settings", "readonly");
+        const store = tx.objectStore("settings");
+        const req = store.get("schedules_by_day");
+
+        req.onsuccess = (e) => {
+          const loadedSchedules = e.target.result;
+          if (loadedSchedules && typeof loadedSchedules === 'object') {
+            schedulesByDay = loadedSchedules;
+          } else {
+            loadSettingsFromLocalStorage();
+          }
+
+          store.get("schedule_enabled").onsuccess = (ev) => {
+            if (ev.target.result !== undefined) document.getElementById('schedule-enable').checked = ev.target.result;
+            else document.getElementById('schedule-enable').checked = localStorage.getItem('schedule_enabled') === 'true';
+          };
+          store.get("random_enabled").onsuccess = (ev) => {
+            if (ev.target.result !== undefined) document.getElementById('random-enable').checked = ev.target.result;
+            else document.getElementById('random-enable').checked = localStorage.getItem('random_enabled') === 'true';
+          };
+          store.get("display_duration").onsuccess = (ev) => {
+            if (ev.target.result !== undefined) document.getElementById('display-duration').value = ev.target.result;
+            else document.getElementById('display-duration').value = localStorage.getItem('display_duration') || '5';
+          };
+          store.get("media_type_filter").onsuccess = (ev) => {
+            if (ev.target.result !== undefined) document.getElementById('media-type-filter').value = ev.target.result;
+            else document.getElementById('media-type-filter').value = localStorage.getItem('media_type_filter') || 'all';
+          };
+          store.get("video_audio_enabled").onsuccess = (ev) => {
+            if (ev.target.result !== undefined) document.getElementById('video-audio-enable').checked = ev.target.result;
+            else document.getElementById('video-audio-enable').checked = localStorage.getItem('video_audio_enabled') === 'true';
+          };
+          store.get("filter_date_ranges").onsuccess = (ev) => {
+            if (ev.target.result !== undefined) filterDateRanges = ev.target.result;
+            else {
+              const savedRanges = localStorage.getItem('filter_date_ranges');
+              if (savedRanges) try { filterDateRanges = JSON.parse(savedRanges); } catch(err) { filterDateRanges = []; }
+            }
+            renderFilterDateList();
+          };
+          store.get("other_date_ratio").onsuccess = (ev) => {
+            if (ev.target.result !== undefined) otherDateRatio = ev.target.result;
+            else {
+              const savedOtherRatio = localStorage.getItem('other_date_ratio');
+              if (savedOtherRatio !== null) otherDateRatio = parseFloat(savedOtherRatio) || 0;
+            }
+            renderFilterDateList();
+            applySettingsUI();
+          };
+        };
+        req.onerror = () => {
+          loadSettingsFromLocalStorage();
+          applySettingsUI();
+        };
+      } else {
+        loadSettingsFromLocalStorage();
+        applySettingsUI();
+      }
+    }
+
+    function loadSettingsFromLocalStorage() {
+      const scheduleEnabled = localStorage.getItem('schedule_enabled') === 'true';
+      const randomEnabled = localStorage.getItem('random_enabled') === 'true';
+      const displayDuration = localStorage.getItem('display_duration') || '5';
+      const mediaType = localStorage.getItem('media_type_filter') || 'all';
+      const videoAudioEnabled = localStorage.getItem('video_audio_enabled') === 'true';
+
+      document.getElementById('schedule-enable').checked = scheduleEnabled;
+      document.getElementById('random-enable').checked = randomEnabled;
+      document.getElementById('display-duration').value = displayDuration;
+      document.getElementById('media-type-filter').value = mediaType;
+      document.getElementById('video-audio-enable').checked = videoAudioEnabled;
+      
+      const savedRanges = localStorage.getItem('filter_date_ranges');
+      if (savedRanges) {
+        try { filterDateRanges = JSON.parse(savedRanges); } catch(e) { filterDateRanges = []; }
+      }
+      const savedOtherRatio = localStorage.getItem('other_date_ratio');
+      if (savedOtherRatio !== null) {
+        otherDateRatio = parseFloat(savedOtherRatio) || 0;
+      }
+      renderFilterDateList();
+      toggleRandomUI();
+
+      const savedSchedules = localStorage.getItem('schedules_by_day');
+      if (savedSchedules) {
+        try {
+          const loaded = JSON.parse(savedSchedules);
+          if (loaded && typeof loaded === 'object') {
+            schedulesByDay = loaded;
+          }
+        } catch(e) {
+          schedulesByDay = JSON.parse(JSON.stringify(defaultSchedules));
+        }
+      }
+
+      for (let i = 0; i < 7; i++) {
+        if (!schedulesByDay[i] || !Array.isArray(schedulesByDay[i]) || schedulesByDay[i].length === 0) {
+          schedulesByDay[i] = JSON.parse(JSON.stringify(defaultSchedules[i]));
+        }
+      }
+    }
+
+    function renderFilterDateList() {
+      const container = document.getElementById('filter-date-list');
+      container.innerHTML = '';
+
+      if (filterDateRanges.length === 0) {
+        container.innerHTML = '<div style="font-size: 0.85rem; color: #888; padding: 4px 0;">期間指定なし（すべてのファイルが対象）</div>';
+        return;
+      }
+
+      filterDateRanges.forEach((range, idx) => {
+        const div = document.createElement('div');
+        div.className = 'filter-item';
+        div.innerHTML = `
+          <input type="date" value="${range.start || ''}" onchange="filterDateRanges[${idx}].start = this.value; saveSettings();">
+          <span style="font-size: 0.85rem; color: #aaa;">〜</span>
+          <input type="date" value="${range.end || ''}" onchange="filterDateRanges[${idx}].end = this.value; saveSettings();">
+          <span style="font-size: 0.8rem; color: #aaa; margin-left: 4px;">割合:</span>
+          <input type="number" min="0" step="0.1" value="${range.ratio !== undefined ? range.ratio : 1}" onchange="filterDateRanges[${idx}].ratio = parseFloat(this.value) || 0; saveSettings();">
+          <button type="button" class="btn btn-danger" style="padding: 6px 10px; width: auto; font-size: 0.8rem;" onclick="removeFilterDateSlot(${idx})">削除</button>
+        `;
+        container.appendChild(div);
+      });
+
+      const otherDiv = document.createElement('div');
+      otherDiv.className = 'filter-item';
+      otherDiv.style.background = '#1b2631';
+      otherDiv.innerHTML = `
+        <span style="font-size: 0.85rem; color: #4da6ff; flex: 1;">上記以外のその他の期間</span>
+        <span style="font-size: 0.8rem; color: #aaa;">割合:</span>
+        <input type="number" min="0" step="0.1" value="${otherDateRatio}" onchange="otherDateRatio = parseFloat(this.value) || 0; saveSettings();">
+      `;
+      container.appendChild(otherDiv);
+
+      saveSettings();
+    }
+
+    function addFilterDateSlot() {
+      if (filterDateRanges.length === 0) {
+        otherDateRatio = 0;
+      }
+      filterDateRanges.push({ start: "", end: "", ratio: 1 });
+      renderFilterDateList();
+    }
+
+    function removeFilterDateSlot(idx) {
+      filterDateRanges.splice(idx, 1);
+      if (filterDateRanges.length === 0) {
+        otherDateRatio = 1;
+      }
+      renderFilterDateList();
+    }
+
+    function switchDayTab(dayIndex) {
+      currentDayTab = dayIndex;
+      document.querySelectorAll('.day-tab').forEach((btn, idx) => {
+        if (idx === dayIndex) btn.classList.add('active');
+        else btn.classList.remove('active');
+      });
+      renderSchedules();
+    }
+
+    function renderSchedules() {
+      const container = document.getElementById('schedule-list');
+      container.innerHTML = '';
+      if (!schedulesByDay[currentDayTab] || schedulesByDay[currentDayTab].length === 0) {
+        schedulesByDay[currentDayTab] = [{ start: "08:00", end: "22:00" }];
+      }
+      const currentSchedules = schedulesByDay[currentDayTab];
+
+      currentSchedules.forEach((s, idx) => {
+        const [startH, startM] = (s.start || "08:00").split(':');
+        const [endH, endM] = (s.end || "22:00").split(':');
+
+        const div = document.createElement('div');
+        div.className = 'schedule-item';
+        div.innerHTML = `
+          <span style="font-size: 0.85rem; width: 100%; font-weight: bold; margin-bottom: 2px;">時間帯 ${idx + 1}:</span>
+          <div class="time-picker-group">
+            <select class="time-select" onchange="updateScheduleTime(${currentDayTab}, ${idx}, 'start', 'h', this.value)">
+              ${generateHourOptionsHTML(startH)}
+            </select>
+            <span>:</span>
+            <select class="time-select" onchange="updateScheduleTime(${currentDayTab}, ${idx}, 'start', 'm', this.value)">
+              ${generateMinOptionsHTML(startM)}
+            </select>
+          </div>
+          <span style="color: #aaa;">〜</span>
+          <div class="time-picker-group">
+            <select class="time-select" onchange="updateScheduleTime(${currentDayTab}, ${idx}, 'end', 'h', this.value)">
+              ${generateHourOptionsHTML(endH)}
+            </select>
+            <span>:</span>
+            <select class="time-select" onchange="updateScheduleTime(${currentDayTab}, ${idx}, 'end', 'm', this.value)">
+              ${generateMinOptionsHTML(endM)}
+            </select>
+          </div>
+          ${currentSchedules.length > 1 ? `<button type="button" class="btn btn-danger" style="padding:4px 8px; width:auto; margin-left:auto;" onclick="removeScheduleSlot(${idx})">削除</button>` : ''}
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function addScheduleSlot() { 
+      if (!schedulesByDay[currentDayTab]) schedulesByDay[currentDayTab] = [];
+      schedulesByDay[currentDayTab].push({ start: "12:00", end: "18:00" }); 
+      renderSchedules(); 
+      saveSettings();
+    }
+
+    function removeScheduleSlot(idx) { 
+      schedulesByDay[currentDayTab].splice(idx, 1); 
+      renderSchedules(); 
+      saveSettings();
+    }
+
+    function toggleRandomUI() {
+      const checkbox = document.getElementById('random-enable');
+      const controls = document.getElementById('random-controls');
+      if (!checkbox || !controls) return;
+      controls.style.display = checkbox.checked ? 'block' : 'none';
+      if (checkbox.checked) renderFilterDateList();
+    }
+
+    function toggleScheduleUI() {
+      const checkbox = document.getElementById('schedule-enable');
+      const controls = document.getElementById('schedule-controls');
+      if (!checkbox || !controls) return;
+      controls.style.display = checkbox.checked ? 'block' : 'none';
+      if (checkbox.checked) renderSchedules();
+    }
+
+    function handleFolderSelect(e) {
+      const files = Array.from(e.target.files);
+      if (files.length === 0) return;
+      runBackgroundProcessing(files);
+      e.target.value = '';
+    }
+
+    function handleFileSelect(e) {
+      const files = Array.from(e.target.files);
+      if (files.length === 0) return;
+      runBackgroundProcessing(files);
+      e.target.value = '';
+    }
+
+    async function runBackgroundProcessing(files) {
+      const statusEl = document.getElementById('bg-status');
+      let successCount = 0;
+      let skippedCount = 0;
+      let totalFiles = files.length;
+      let processed = 0;
+      const progressWrap = document.getElementById('upload-progress-wrap');
+      const progressBar = document.getElementById('upload-progress-bar');
+      const progressText = document.getElementById('upload-progress-text');
+      const btnFolder = document.getElementById('btn-folder');
+      const btnFile = document.getElementById('btn-file');
+      
+      // 登録中の誤操作防止
+      if (btnFolder) { btnFolder.style.pointerEvents = 'none'; btnFolder.style.opacity = '0.5'; }
+      if (btnFile) { btnFile.style.pointerEvents = 'none'; btnFile.style.opacity = '0.5'; }
+
+      progressWrap.style.display = 'block';
+      statusEl.innerText = `登録準備中: 0 / ${totalFiles} 件`;
+      progressText.innerText = `0 / ${totalFiles}`;
+      progressBar.style.width = '0%';
+
+      // ユーザーに進捗状況が見えるように画面上部へスクロール（確実に表示）
+      const setupScreen = document.getElementById('setup-screen');
+      if (setupScreen) {
+        setupScreen.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      // スクロール完了とUI描画の反映を少し待機する
+      await new Promise(r => setTimeout(r, 200));
+
+      for (const file of files) {
+        processed++;
+        progressText.innerText = `${processed} / ${totalFiles}`;
+        progressBar.style.width = `${Math.round(processed / totalFiles * 100)}%`;
+        statusEl.innerText = `登録中: ${processed} / ${totalFiles} 件`;
+        const isImage = file.type.startsWith('image/') || /\.(jpe?g|png|webp|gif)$/i.test(file.name);
+        const isVideo = file.type.startsWith('video/') || /\.(mp4|webm|ogg|mov)$/i.test(file.name);
+        const isNotMac = !file.webkitRelativePath || !file.webkitRelativePath.includes('__MACOSX');
+
+        if ((isImage || isVideo) && isNotMac) {
+          const isDuplicate = photoMetaList.some(p => p.name === file.name && p.size === file.size);
+          if (isDuplicate) {
+            skippedCount++;
+            continue;
+          }
+
+          statusEl.innerText = `読込中: ${processed} / ${totalFiles} 件目...`;
+          const fileTimestamp = file.lastModified || Date.now();
+          try {
+            let blobToSave = file;
+            if (isImage) {
+              blobToSave = await compressImage(file);
+            }
+
+            if (photoMetaList.some(p => p.name === file.name && p.size === blobToSave.size)) {
+              skippedCount++;
+              continue;
+            }
+
+            await new Promise((resolve) => {
+              saveBlobToDB(blobToSave, file.name, blobToSave.size, fileTimestamp, isVideo, (newId) => {
+                const date = new Date(fileTimestamp);
+                const dateStr = `${date.getFullYear()}/${String(date.getMonth()+1).padStart(2,'0')}/${String(date.getDate()).padStart(2,'0')} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+                photoMetaList.push({ id: newId, name: file.name, size: blobToSave.size, timestamp: fileTimestamp, dateText: dateStr, isVideo });
+                document.getElementById('photo-count').innerText = photoMetaList.length;
+                resolve();
+              });
+            });
+            successCount++;
+          } catch (err) {
+            console.error("File process error:", err);
+          }
+        }
+        
+        // 頻繁に yield して UI (プログレスバーや枚数) がフリーズせずに滑らかに更新されるように修正
+        if (processed % 1 === 0) {
+          await new Promise(resolve => {
+            requestAnimationFrame(() => setTimeout(resolve, 5));
+          });
+        }
+      }
+
+      let msg = `✅ 追加完了！ (${successCount}件追加)`;
+      if (skippedCount > 0) {
+        msg += ` ※重複した${skippedCount}件を除外しました`;
+      }
+      statusEl.innerText = msg;
+      progressBar.style.width = '100%';
+      progressText.innerText = `${totalFiles} / ${totalFiles}`;
+      
+      // ボタン復帰
+      if (btnFolder) { btnFolder.style.pointerEvents = 'auto'; btnFolder.style.opacity = '1'; }
+      if (btnFile) { btnFile.style.pointerEvents = 'auto'; btnFile.style.opacity = '1'; }
+
+      setTimeout(() => {
+        if (statusEl.innerText.includes('追加完了')) statusEl.innerText = '待機中';
+        progressWrap.style.display = 'none';
+      }, 5000);
+    }
+
+    function openPhotoManager() {
+      managerPage = 1;
+      renderPhotoManager();
+      document.getElementById('modal-screen').style.display = 'flex';
+    }
+
+    function switchManagerView(mode) {
+      managerViewMode = mode;
+      document.getElementById('view-btn-grid').classList.toggle('active', mode === 'grid');
+      document.getElementById('view-btn-list').classList.toggle('active', mode === 'list');
+      
+      const container = document.getElementById('thumbnail-container');
+      container.className = `modal-body ${mode}-view`;
+      
+      renderPhotoManager();
+    }
+
+    function changeSortConfig() {
+      managerSortKey = document.getElementById('sort-key').value;
+      managerSortOrder = document.getElementById('sort-order').value;
+      managerPage = 1;
+      renderPhotoManager();
+    }
+
+    function getSortedPhotoList() {
+      const list = [...photoMetaList];
+      list.sort((a, b) => {
+        let valA = a[managerSortKey];
+        let valB = b[managerSortKey];
+
+        if (typeof valA === 'string') {
+          const cmp = valA.localeCompare(valB, 'ja', { numeric: true });
+          return managerSortOrder === 'asc' ? cmp : -cmp;
+        } else {
+          return managerSortOrder === 'asc' ? valA - valB : valB - valA;
+        }
+      });
+      return list;
+    }
+
+    function changeManagerPage(direction) {
+      const maxPage = Math.ceil(photoMetaList.length / ITEMS_PER_PAGE) || 1;
+      managerPage += direction;
+      if (managerPage < 1) managerPage = 1;
+      if (managerPage > maxPage) managerPage = maxPage;
+      renderPhotoManager();
+    }
+
+    async function renderPhotoManager() {
+      const container = document.getElementById('thumbnail-container');
+      container.innerHTML = '';
+      document.getElementById('manager-count').innerText = photoMetaList.length;
+
+      if (photoMetaList.length === 0) {
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #888; padding: 40px;">登録されているファイルはありません</div>';
+        document.getElementById('page-indicator').innerText = '1 / 1';
+        return;
+      }
+
+      const sortedList = getSortedPhotoList();
+
+      const maxPage = Math.ceil(sortedList.length / ITEMS_PER_PAGE);
+      if (managerPage > maxPage) managerPage = maxPage;
+
+      document.getElementById('page-indicator').innerText = `${managerPage} / ${maxPage}`;
+
+      const start = (managerPage - 1) * ITEMS_PER_PAGE;
+      const end = start + ITEMS_PER_PAGE;
+      const pageItems = sortedList.slice(start, end);
+
+      for (const meta of pageItems) {
+        const div = document.createElement('div');
+        
+        if (managerViewMode === 'grid') {
+          div.className = 'thumb-item';
+          div.id = `thumb-box-${meta.id}`;
+          div.innerHTML = `
+            <div class="thumb-name" title="${meta.name}">${meta.name}</div>
+            <button type="button" class="thumb-del" onclick="deletePhoto(${meta.id})">削除</button>
+          `;
+        } else {
+          div.className = 'list-item';
+          div.id = `thumb-box-${meta.id}`;
+          div.innerHTML = `
+            <div class="list-info">
+              <div class="list-title" title="${meta.name}">${meta.name}</div>
+              <div class="list-sub">${meta.isVideo ? '動画' : '写真'} | 撮影日: ${meta.dateText}</div>
+            </div>
+            <button type="button" class="thumb-del" style="padding: 6px 12px; font-size: 0.8rem;" onclick="deletePhoto(${meta.id})">削除</button>
+          `;
+        }
+        
+        container.appendChild(div);
+
+        const blob = await getBlobFromDB(meta.id);
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          if (meta.isVideo) {
+            const video = document.createElement('video');
+            video.src = url;
+            video.muted = true;
+            video.onloadeddata = () => URL.revokeObjectURL(url);
+            div.insertBefore(video, div.firstChild);
+          } else {
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = meta.name;
+            img.loading = 'lazy';
+            img.onload = () => URL.revokeObjectURL(url);
+            div.insertBefore(img, div.firstChild);
+          }
+        }
+      }
+    }
+
+    function closePhotoManager() {
+      document.getElementById('modal-screen').style.display = 'none';
+      document.getElementById('photo-count').innerText = photoMetaList.length;
+    }
+
+    function deletePhoto(id) {
+      deletePhotoFromDB(id, () => {
+        photoMetaList = photoMetaList.filter(p => p.id !== id);
+        renderPhotoManager();
+        document.getElementById('photo-count').innerText = photoMetaList.length;
+      });
+    }
+
+    function deleteCurrentPhoto(e) {
+      if (e) e.stopPropagation();
+      if (!currentPlayingPhotoId) return;
+
+      if (confirm("表示中の写真を削除しますか？")) {
+        const targetId = currentPlayingPhotoId;
+        deletePhotoFromDB(targetId, () => {
+          photoMetaList = photoMetaList.filter(p => p.id !== targetId);
+          document.getElementById('photo-count').innerText = photoMetaList.length;
+          
+          const playableList = getFilteredPlayableList();
+          if (!playableList.length) {
+            alert("再生可能なファイルが無くなったため設定画面に戻ります。");
+            stopSlideshow();
+          } else {
+            showNextPhoto();
+          }
+        });
+      }
+    }
+
+    function isPhotoInRange(photoTime, range) {
+      if (!range || (!range.start && !range.end)) return true;
+      const d = new Date(photoTime);
+      if (isNaN(d.getTime())) return false;
+      const photoDateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      if (range.start && photoDateStr < range.start) return false;
+      if (range.end && photoDateStr > range.end) return false;
+      return true;
+    }
+
+    function getFilteredPlayableList() {
+      const mediaType = document.getElementById('media-type-filter').value;
+      let list = photoMetaList.filter(item => {
+        if (mediaType === 'image') return !item.isVideo;
+        if (mediaType === 'video') return item.isVideo;
+        return true;
+      });
+
+      const validRanges = filterDateRanges.filter(r => r.start || r.end);
+      if (validRanges.length > 0) {
+        list = list.filter(item => {
+          const matchedRangeIdx = validRanges.findIndex(r => isPhotoInRange(item.timestamp, r));
+          if (matchedRangeIdx !== -1) {
+            const ratio = validRanges[matchedRangeIdx].ratio !== undefined ? validRanges[matchedRangeIdx].ratio : 1;
+            return ratio > 0;
+          } else {
+            return otherDateRatio > 0;
+          }
+        });
+      }
+
+      return list;
+    }
+
+    function startSlideshow() {
+      const playableList = getFilteredPlayableList();
+      if (!playableList.length) return alert('条件に合う再生可能なファイルが見つかりません');
+      document.getElementById('setup-screen').style.display = 'none';
+      document.getElementById('slideshow-screen').style.display = 'block';
+      currentIndex = 0;
+      
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(err => {});
+      }
+
+      const container = document.getElementById('photo-container');
+      container.innerHTML = '';
+      
+      showNextPhoto();
+    }
+
+    function resetTimer() {
+      if (timer) clearTimeout(timer);
+      let durationSec = parseInt(document.getElementById('display-duration').value, 10) || 5;
+      if (durationSec < 1) durationSec = 1;
+      timer = setTimeout(checkScheduleAndNext, durationSec * 1000);
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(err => {});
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(err => {});
+        }
+      }
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+      const controls = document.getElementById('controls');
+      if (document.fullscreenElement) {
+        controls.style.display = 'none';
+      } else {
+        controls.style.display = 'flex';
+      }
+    });
+
+    const slideshowScreen = document.getElementById('slideshow-screen');
+
+    slideshowScreen.addEventListener('touchstart', (e) => {
+      if (e.target.closest('#controls')) return;
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    slideshowScreen.addEventListener('touchend', (e) => {
+      if (e.target.closest('#controls')) return;
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+
+      if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
+        if (diffX < 0) {
+          checkScheduleAndNext();
+        } else {
+          showPrevPhoto();
+        }
+      } else if (Math.abs(diffX) < 10 && Math.abs(diffY) < 10) {
+        if (document.fullscreenElement) {
+          if (document.exitFullscreen) {
+            document.exitFullscreen().catch(err => {});
+          }
+        }
+      }
+    }, { passive: true });
+
+    function showPrevPhoto() {
+      const playableList = getFilteredPlayableList();
+      if (!playableList.length) return;
+      
+      const isRandom = document.getElementById('random-enable').checked;
+      if (isRandom) {
+        showNextPhoto();
+      } else {
+        let currentIdx = playableList.findIndex(item => item.id === currentPlayingPhotoId);
+        if (currentIdx === -1) currentIdx = 0;
+        
+        let prevIndex = (currentIdx - 1 + playableList.length) % playableList.length;
+        currentIndex = prevIndex;
+        renderMediaAtIndex(prevIndex);
+      }
+    }
+
+    async function renderMediaAtIndex(index) {
+      const playableList = getFilteredPlayableList();
+      if (!playableList.length) return;
+      if (timer) clearTimeout(timer);
+
+      const meta = playableList[index];
+      currentPlayingPhotoId = meta.id;
+
+      const blob = await getBlobFromDB(meta.id);
+      if (!blob) return;
+
+      if (currentObjectUrl) {
+        URL.revokeObjectURL(currentObjectUrl);
+      }
+      currentObjectUrl = URL.createObjectURL(blob);
+
+      const container = document.getElementById('photo-container');
+
+      const oldWrappers = container.querySelectorAll('.photo-wrapper.active');
+      oldWrappers.forEach(w => {
+        w.classList.remove('active');
+        w.classList.add('inactive');
+        setTimeout(() => w.remove(), 1600);
+      });
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'photo-wrapper';
+      
+      if (meta.isVideo) {
+        const video = document.createElement('video');
+        video.src = currentObjectUrl;
+        video.className = 'photo';
+        video.autoplay = true;
+        
+        const audioEnabled = document.getElementById('video-audio-enable').checked;
+        video.muted = !audioEnabled;
+        
+        video.playsInline = true;
+        video.onended = () => {
+          checkScheduleAndNext();
+        };
+        video.onerror = () => {
+          resetTimer();
+        };
+        wrapper.appendChild(video);
+      } else {
+        const img = document.createElement('img');
+        img.src = currentObjectUrl; 
+        img.className = 'photo';
+        wrapper.appendChild(img);
+        resetTimer();
+      }
+
+      container.appendChild(wrapper);
+
+      setTimeout(() => wrapper.classList.add('active'), 50);
+
+      document.getElementById('date-overlay').innerText = meta.dateText;
+    }
+
+    async function showNextPhoto() {
+      const playableList = getFilteredPlayableList();
+      if (!playableList.length) return;
+
+      const isRandom = document.getElementById('random-enable').checked;
+      const validRanges = filterDateRanges.filter(r => r.start || r.end);
+
+      let nextIndex = currentIndex;
+
+      if (isRandom) {
+        if (validRanges.length > 0) {
+          let groups = [];
+
+          validRanges.forEach(range => {
+            const list = playableList.filter(item => isPhotoInRange(item.timestamp, range));
+            const ratio = range.ratio !== undefined ? range.ratio : 1;
+            if (list.length > 0 && ratio > 0) {
+              groups.push({ list, weight: ratio });
+            }
+          });
+
+          const otherList = playableList.filter(item => {
+            return !validRanges.some(range => isPhotoInRange(item.timestamp, range));
+          });
+          if (otherList.length > 0 && otherDateRatio > 0) {
+            groups.push({ list: otherList, weight: otherDateRatio });
+          }
+
+          if (groups.length > 0) {
+            const totalWeight = groups.reduce((sum, g) => sum + g.weight, 0);
+            let rand = Math.random() * totalWeight;
+            let selectedGroup = groups[0];
+
+            for (const g of groups) {
+              if (rand < g.weight) {
+                selectedGroup = g;
+                break;
+              }
+              rand -= g.weight;
+            }
+
+            const chosenItem = selectedGroup.list[Math.floor(Math.random() * selectedGroup.list.length)];
+            nextIndex = playableList.findIndex(item => item.id === chosenItem.id);
+          } else {
+            nextIndex = Math.floor(Math.random() * playableList.length);
+          }
+        } else {
+          if (playableList.length > 1) {
+            let currentIdx = playableList.findIndex(item => item.id === currentPlayingPhotoId);
+            let newIndex;
+            do {
+              newIndex = Math.floor(Math.random() * playableList.length);
+            } while (newIndex === currentIdx && playableList.length > 1);
+            nextIndex = newIndex;
+          } else {
+            nextIndex = 0;
+          }
+        }
+      } else {
+        let currentIdx = playableList.findIndex(item => item.id === currentPlayingPhotoId);
+        if (currentIdx === -1) {
+          nextIndex = 0;
+        } else {
+          nextIndex = (currentIdx + 1) % playableList.length;
+        }
+      }
+
+      currentIndex = nextIndex;
+      await renderMediaAtIndex(nextIndex);
+    }
+
+    function checkScheduleAndNext() {
+      const isScheduled = document.getElementById('schedule-enable').checked;
+      if (isScheduled && !isInActiveSchedule()) {
+        document.getElementById('blackout-screen').style.display = 'block';
+        resetTimer();
+      } else {
+        document.getElementById('blackout-screen').style.display = 'none';
+        showNextPhoto();
+      }
+    }
+
+    function isInActiveSchedule() {
+      const now = new Date();
+      const dayOfWeek = now.getDay();
+      const currentMin = now.getHours() * 60 + now.getMinutes();
+      const daySchedules = schedulesByDay[dayOfWeek] || [];
+
+      return daySchedules.some(s => {
+        const [sh, sm] = s.start.split(':').map(Number);
+        const [eh, em] = s.end.split(':').map(Number);
+        const startMin = sh * 60 + sm; const endMin = eh * 60 + em;
+        return startMin <= endMin ? (currentMin >= startMin && currentMin < endMin) : (currentMin >= startMin || currentMin < endMin);
+      });
+    }
+
+    function stopSlideshow() {
+      if (timer) clearTimeout(timer);
+
+      const container = document.getElementById('photo-container');
+      if (container) {
+        const videos = container.querySelectorAll('video');
+        videos.forEach(v => {
+          v.pause();
+          v.muted = true;
+          v.removeAttribute('src');
+          v.load();
+        });
+        container.innerHTML = '';
+      }
+
+      if (currentObjectUrl) {
+        URL.revokeObjectURL(currentObjectUrl);
+        currentObjectUrl = null;
+      }
+      currentPlayingPhotoId = null;
+
+      if (document.fullscreenElement) {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(err => {});
+        }
+      }
+
+      document.getElementById('slideshow-screen').style.display = 'none';
+      document.getElementById('blackout-screen').style.display = 'none';
+      document.getElementById('setup-screen').style.display = 'flex';
+    }
+
+    // JS側で安全・確実にイベントを登録し直す
+    document.addEventListener('DOMContentLoaded', () => {
+      const randomCb = document.getElementById('random-enable');
+      if (randomCb) {
+        randomCb.addEventListener('change', () => {
+          toggleRandomUI();
+          saveSettings();
+        });
+      }
+      
+      const scheduleCb = document.getElementById('schedule-enable');
+      if (scheduleCb) {
+        scheduleCb.addEventListener('change', () => {
+          toggleScheduleUI();
+          saveSettings();
+        });
+      }
+
+      const addFilterBtn = document.getElementById('add-filter-date-button');
+      if (addFilterBtn) {
+        addFilterBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          addFilterDateSlot();
+        });
+      }
+
+      const addScheduleBtn = document.getElementById('add-schedule-slot-button');
+      if (addScheduleBtn) {
+        addScheduleBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          addScheduleSlot();
+        });
+      }
+    });
+
+  </script>
+</body>
+</html>
+      position: relative;
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: 1px;
+      border-radius: 27px;
+      border: 1px solid rgba(255,255,255,.025);
+      pointer-events: none;
+    }
+
+    h1 {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      font-size: clamp(1.45rem, 5.2vw, 2rem);
+      line-height: 1.25;
+      margin-bottom: 24px;
+      text-align: center;
+      color: var(--text);
+      letter-spacing: .02em;
+      text-shadow: 0 2px 14px rgba(75,190,235,.18);
+    }
+
+    .app-logo {
+      width: 64px;
+      height: 64px;
+      flex: 0 0 64px;
+      object-fit: cover;
+      border-radius: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.10);
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      min-height: 58px;
+      padding: 14px 18px;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 18px;
+      font-size: 1rem;
+      line-height: 1.35;
+      font-weight: 750;
+      margin-top: 11px;
+      text-align: center;
+      cursor: pointer;
+      background: linear-gradient(135deg, #36b9ef, #147fbd);
+      box-shadow: 0 8px 20px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.22);
+      transition: transform .16s ease, filter .16s ease, box-shadow .16s ease;
+    }
+    .btn:hover { filter: brightness(1.06); }
+    .btn:active { transform: translateY(2px) scale(.992); box-shadow: 0 4px 12px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.15); }
+
+    .install-btn {
+      background: linear-gradient(135deg, #f5d57d, #c88a2f) !important;
+      color: #2b2114 !important;
+      border-color: rgba(255,235,170,.58) !important;
+      box-shadow: 0 8px 24px rgba(196,132,38,.22), inset 0 1px 0 rgba(255,255,255,.42);
+    }
+    .btn-folder {
+      background: linear-gradient(135deg, #b9763a, #6d3b20) !important;
+      border-color: rgba(236,180,115,.38) !important;
+    }
+    .btn-preview {
+      background: linear-gradient(135deg, #e1b85d, #9d6729) !important;
+      color: #21180d !important;
+      border-color: rgba(255,224,147,.5) !important;
+    }
+    .btn-secondary {
+      background: linear-gradient(135deg, #236f87, #17495a) !important;
+      border-color: rgba(112,211,242,.30) !important;
+      margin-top: 8px;
+    }
+    .btn-danger {
+      background: linear-gradient(135deg, #db656c, #a83c48) !important;
+      border-color: rgba(255,165,172,.32) !important;
+    }
+
+    .ui-icon {
+      width: 1.35em;
+      height: 1.35em;
+      flex: 0 0 1.35em;
+      display: inline-block;
+      vertical-align: -0.2em;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .ui-icon-fill { fill: currentColor; stroke: none; }
+
+    .status-panel {
+      margin: 18px 0 14px;
+      padding: 19px 16px;
+      text-align: center;
+      background: linear-gradient(180deg, rgba(4,24,32,.92), rgba(6,30,39,.76));
+      border: 1px solid rgba(104,198,227,.17);
+      border-radius: 22px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+    }
+    .count-label {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #dceff6;
+      letter-spacing: .02em;
+    }
+    #photo-count { color: var(--sky); font-size: 1.45em; margin: 0 3px; }
+    #bg-status { color: var(--muted); font-size: .82rem; margin-top: 6px; min-height: 1.2em; }
+
+    /* 設定項目 */
+    .card > div[style*="background"] {
+      margin-top: 14px !important;
+      padding: 16px !important;
+      background: linear-gradient(180deg, rgba(20,48,59,.90), rgba(10,31,40,.90)) !important;
+      border: 1px solid rgba(111,201,226,.13);
+      border-radius: 20px !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+    }
+    .card > div[style*="background"] label {
+      color: #e7f5f9 !important;
+      margin-bottom: 9px !important;
+    }
+
+    select, input[type="number"], input[type="date"] {
+      appearance: none;
+      -webkit-appearance: none;
+      background: #071e28 !important;
+      color: #f4fbff !important;
+      border: 1px solid rgba(116,199,225,.28) !important;
+      border-radius: 13px !important;
+      min-height: 46px;
+      padding: 9px 13px !important;
+      outline: none;
+    }
+    select:focus, input:focus {
+      border-color: rgba(83,201,244,.72) !important;
+      box-shadow: 0 0 0 3px rgba(50,177,224,.12);
+    }
+    #media-type-filter {
+      background-image: linear-gradient(45deg, transparent 50%, #9fc7d3 50%), linear-gradient(135deg, #9fc7d3 50%, transparent 50%);
+      background-position: calc(100% - 17px) 20px, calc(100% - 11px) 20px;
+      background-size: 6px 6px, 6px 6px;
+      background-repeat: no-repeat;
+      padding-right: 34px !important;
+    }
+
+    input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 23px;
+      height: 23px;
+      min-width: 23px;
+      margin: 0;
+      border-radius: 7px;
+      border: 1px solid rgba(125,207,231,.42);
+      background: #071e28;
+      position: relative;
+      cursor: pointer;
+      z-index: 10;
+    }
+    input[type="checkbox"]:checked {
+      background: linear-gradient(135deg, #63d0f7, #168bc2);
+      border-color: #8bdef8;
+    }
+    input[type="checkbox"]:checked::after {
+      content: "";
+      position: absolute;
+      left: 6px;
+      top: 2px;
+      width: 7px;
+      height: 12px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    .day-tabs { display: flex; gap: 5px; margin-bottom: 12px; flex-wrap: wrap; }
+    .day-tab {
+      background: #0a2630;
+      color: #9bb6c0;
+      border: 1px solid rgba(119,199,224,.18);
+      padding: 9px 8px;
+      border-radius: 11px;
+      cursor: pointer;
+      font-size: .85rem;
+      font-weight: 700;
+      flex: 1;
+      text-align: center;
+    }
+    .day-tab.active {
+      background: linear-gradient(135deg, #48c4ef, #168bc2);
+      color: #fff;
+      border-color: rgba(147,229,252,.55);
+      box-shadow: 0 5px 14px rgba(20,145,195,.22);
+    }
+
+    .schedule-item, .filter-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(5,26,34,.78) !important;
+      padding: 11px;
+      border-radius: 14px;
+      margin-bottom: 8px;
+      gap: 6px;
+      flex-wrap: wrap;
+      border: 1px solid rgba(116,199,225,.13);
+    }
+    .time-picker-group { display: flex; align-items: center; gap: 3px; }
+    .time-select {
+      background: #071e28 !important;
+      color: #fff !important;
+      border: 1px solid rgba(116,199,225,.28) !important;
+      padding: 7px 5px !important;
+      border-radius: 10px !important;
+      font-size: .9rem;
+      text-align: center;
+      font-weight: 750;
+      min-height: 40px;
+    }
+    .filter-item input[type="date"] { min-width: 110px; flex: 1; font-size: .85rem; }
+    .filter-item input[type="number"] { width: 64px; text-align: center; font-size: .85rem; }
+
+    /* モーダル */
+    #modal-screen {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(2,12,16,.82);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1100;
+      padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
+    }
+    .modal-card {
+      background: linear-gradient(180deg, #12333f, #081f28);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 780px;
+      height: min(88dvh, 820px);
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(126,207,232,.25);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .modal-header {
+      padding: 15px 17px;
+      border-bottom: 1px solid rgba(126,207,232,.13);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      background: rgba(14,42,53,.92);
+    }
+    .modal-header h3 { font-size: 1rem; }
+    .modal-toolbar {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(126,207,232,.13);
+      background: rgba(8,31,40,.95);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      font-size: .82rem;
+    }
+    .modal-toolbar select, .modal-toolbar button {
+      background: #0a2630 !important;
+      color: #eaf7fb !important;
+      border: 1px solid rgba(116,199,225,.24) !important;
+      padding: 7px 9px !important;
+      border-radius: 10px !important;
+      cursor: pointer;
+      min-height: 38px;
+    }
+    .view-btn-group { display: flex; gap: 4px; }
+    .view-btn.active { background: linear-gradient(135deg,#48c4ef,#168bc2) !important; color: #fff !important; border-color: rgba(147,229,252,.5) !important; font-weight: bold; }
+    .modal-body { padding: 14px; overflow-y: auto; overflow-x: hidden; flex: 1; min-height: 0; -webkit-overflow-scrolling: touch; }
+    .modal-body.grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(125px, 1fr)); gap: 11px; align-content: start; }
+    .thumb-item {
+      background: #0b2731;
+      border-radius: 14px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(116,199,225,.16);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 150px;
+      flex-shrink: 0;
+    }
+    .thumb-item img, .thumb-item video { width: 100%; height: 96px; object-fit: cover; flex-shrink: 0; display: block; background: #06151b; }
+    .thumb-name { font-size: .7rem; padding: 4px 5px 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: center; color: #c8dce2; height: 25px; flex-shrink: 0; }
+    .thumb-del { background: linear-gradient(135deg,#db656c,#a83c48) !important; color:#fff; border: 1px solid rgba(255,180,186,.25); border-radius: 9px; padding: 4px 10px; font-size: .7rem; cursor:pointer; margin-top: 3px; }
+    .modal-body.list-view { display: flex; flex-direction: column; gap: 8px; }
+    .list-item { background: #0b2731; border-radius: 14px; border: 1px solid rgba(116,199,225,.16); display:flex; align-items:center; padding: 9px 11px; gap: 12px; }
+    .list-item img, .list-item video { width: 54px; height: 54px; object-fit:cover; border-radius: 9px; background:#06151b; flex-shrink:0; }
+    .list-info { flex:1; min-width:0; }
+    .list-title { font-size:.9rem; font-weight:bold; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .list-sub { font-size:.75rem; color:#9db7c0; margin-top:3px; }
+    .modal-footer { padding: 10px 14px; border-top:1px solid rgba(126,207,232,.13); display:flex; justify-content:space-between; align-items:center; gap:8px; background:#0b2731; }
+
+    /* スライドショー */
+    #slideshow-screen {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100dvh;
+      display: none;
+      background: #000;
+      z-index: 1000;
+      overflow: hidden;
+      cursor: pointer;
+      touch-action: pan-y;
+    }
+    .photo-wrapper { position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 1.5s ease-in-out; }
+    .photo-wrapper.active { opacity:1; z-index:2; }
+    .photo-wrapper.inactive { opacity:0; z-index:1; }
+    .photo { max-width:100%; max-height:100%; object-fit:contain; }
+    #date-overlay { position:absolute; bottom:max(18px, env(safe-area-inset-bottom)); left:max(18px, env(safe-area-inset-left)); background:rgba(5,22,28,.72); color:#eaf8fc; padding:8px 13px; border-radius:13px; font-size:1rem; z-index:20; border:1px solid rgba(132,210,233,.18); pointer-events:none; backdrop-filter:blur(7px); }
+    #blackout-screen { position:fixed; inset:0; width:100%; height:100%; background:#000; z-index:50; display:none; cursor:pointer; }
+    #controls { position:absolute; top:max(12px, env(safe-area-inset-top)); right:max(12px, env(safe-area-inset-right)); z-index:30; display:flex; gap:7px; flex-wrap:wrap; justify-content:flex-end; }
+    .ctrl-btn { background:rgba(5,22,28,.72); color:#fff; border:1px solid rgba(132,210,233,.25); padding:9px 12px; border-radius:14px; cursor:pointer; backdrop-filter:blur(7px); }
+    .ctrl-btn-danger { background:rgba(168,60,72,.82); border-color:rgba(255,170,178,.32); }
+    input[type="file"] { display:none; }
+
+    @media (max-width: 560px) {
+      #setup-screen { padding-left: 10px; padding-right: 10px; }
+      .card { padding: 22px 14px 28px; border-radius: 25px; margin-top: 8px; }
+      .card::after { border-radius: 24px; }
+      h1 { gap: 11px; font-size: 1.48rem; }
+      .app-logo { width: 58px; height: 58px; flex-basis: 58px; border-radius: 16px; }
+      .btn { min-height: 58px; font-size: .98rem; border-radius: 17px; }
+      .section-title { line-height: 1.35; }
+      .modal-header { padding: 12px 13px; }
+      .modal-toolbar { padding: 9px 10px; }
+      .modal-body.grid-view { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      #controls { top: max(9px, env(safe-area-inset-top)); right: 9px; gap: 5px; }
+      .ctrl-btn { padding: 8px 10px; font-size: .76rem; }
+      #date-overlay { left: 10px; bottom: max(10px, env(safe-area-inset-bottom)); font-size: .84rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="setup-screen">
+    <div class="card">
+      <h1><img class="app-logo" src="./2376.png" alt=""><span>デジタルフォトフレーム</span></h1>
+      
       <button id="install-button" class="btn" style="display: none; background: #ff9800; margin-bottom: 15px;">
         <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M10 5h4M11 18h2"/><path d="M2.5 9.5h7M6 6l3.5 3.5L6 13"/></svg>アプリとしてインストール
       </button>
