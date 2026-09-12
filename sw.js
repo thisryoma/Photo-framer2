@@ -1,4 +1,4 @@
-const CACHE_NAME = 'photo-frame-v1';
+const CACHE_NAME = 'photo-frame-v2';
 // キャッシュするファイルの一覧（必要に応じて追加してください）
 const ASSETS_TO_CACHE = [
   './',
