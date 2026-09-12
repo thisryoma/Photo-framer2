@@ -1,9 +1,11 @@
-const CACHE_NAME = 'photo-frame-v2';
-// キャッシュするファイルの一覧（必要に応じて追加してください）
+// キャッシュバージョンを上げて強制的に更新させる
+const CACHE_NAME = 'photo-frame-v3';
+// キャッシュするファイルの一覧（アイコン画像を追加）
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './2376.png'
 ];
 
 // 1. インストール処理：必要なファイルをキャッシュに保存
